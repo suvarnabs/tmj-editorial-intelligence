@@ -1,6 +1,7 @@
 import logging
 
 import psycopg
+from psycopg.rows import dict_row
 
 from app.core.config import settings
 
@@ -18,3 +19,7 @@ def check_database_connection() -> tuple[bool, str | None]:
     except Exception as exc:
         logger.exception("Database connection failed")
         return False, str(exc)
+
+
+def get_connection() -> psycopg.Connection:
+    return psycopg.connect(settings.database_url, row_factory=dict_row)

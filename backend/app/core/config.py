@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_service_role_key: str
     cors_origins: str = "http://localhost:3000"
+    api_secret_key: str | None = None
+    ingestion_max_articles_per_source: int = 50
 
     @property
     def cors_origin_list(self) -> list[str]:
