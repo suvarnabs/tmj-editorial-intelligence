@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 def check_database_connection() -> tuple[bool, str | None]:
     """Return (connected, error_message)."""
     try:
-        with psycopg.connect(settings.database_url, connect_timeout=5) as conn:
+        with psycopg.connect(
+            settings.database_url,
+            connect_timeout=5,
+            prepare_threshold=None,
+        ) as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
                 cur.fetchone()
@@ -22,4 +26,8 @@ def check_database_connection() -> tuple[bool, str | None]:
 
 
 def get_connection() -> psycopg.Connection:
-    return psycopg.connect(settings.database_url, row_factory=dict_row)
+    return psycopg.connect(
+        settings.database_url,
+        row_factory=dict_row,
+        prepare_threshold=None,
+    )

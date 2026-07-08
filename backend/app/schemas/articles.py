@@ -17,5 +17,17 @@ class ArticleRead(BaseModel):
     extracted_text: str
     word_count: int | None = None
     raw_html: str | None = None
+    processing_status: str | None = None
+    processing_error: str | None = None
+    summary: str | None = None
+    sentiment: str | None = None
+    sentiment_score: float | None = None
+    emotional_signals: dict | None = None
+    stakeholder_stance: dict | None = None
+    suggested_story_formats: list[str] | None = None
+    kerala_relevance: str | None = None
+    editorial_score: float | None = None
+    coverage_recommendation: str | None = None
+    recommended_angle: str | None = None
     created_at: datetime
     updated_at: datetime

@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     api_secret_key: str | None = None
     ingestion_max_articles_per_source: int = 50
+    openai_api_key: str | None = None
+    openai_chat_model: str = "gpt-4o-mini"
+    enrichment_batch_size: int = 3
 
     @property
     def cors_origin_list(self) -> list[str]:

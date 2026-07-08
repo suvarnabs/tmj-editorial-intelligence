@@ -1,0 +1,93 @@
+ENRICHMENT_JSON_SCHEMA = {
+    "name": "tmj_article_enrichment",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary": {"type": "string"},
+            "sentiment": {"type": "string", "enum": ["positive", "negative", "neutral", "mixed"]},
+            "sentiment_score": {"type": "number", "minimum": -1, "maximum": 1},
+            "emotional_signals": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "concern": {"type": "number", "minimum": 0, "maximum": 1},
+                    "optimism": {"type": "number", "minimum": 0, "maximum": 1},
+                    "frustration": {"type": "number", "minimum": 0, "maximum": 1},
+                    "urgency": {"type": "number", "minimum": 0, "maximum": 1},
+                },
+                "required": ["concern", "optimism", "frustration", "urgency"],
+            },
+            "stakeholder_stance": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "government": {"type": "string"},
+                    "public": {"type": "string"},
+                    "experts": {"type": "string"},
+                    "industry": {"type": "string"},
+                },
+                "required": ["government", "public", "experts", "industry"],
+            },
+            "suggested_story_formats": {
+                "type": "array",
+                "items": {"type": "string"},
+                "maxItems": 5,
+            },
+            "kerala_relevance": {"type": "string"},
+            "coverage_recommendation": {
+                "type": "string",
+                "enum": ["today", "this_week", "monitor", "skip"],
+            },
+            "recommended_angle": {"type": "string"},
+            "themes": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "slug": {"type": "string"},
+                        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                    },
+                    "required": ["slug", "confidence"],
+                },
+                "minItems": 1,
+                "maxItems": 3,
+            },
+            "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 12},
+            "scoring_inputs": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "public_impact": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "kerala_relevance": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "urgency": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "originality_potential": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "follow_up_value": {"type": "integer", "minimum": 0, "maximum": 100},
+                },
+                "required": [
+                    "public_impact",
+                    "kerala_relevance",
+                    "urgency",
+                    "originality_potential",
+                    "follow_up_value",
+                ],
+            },
+        },
+        "required": [
+            "summary",
+            "sentiment",
+            "sentiment_score",
+            "emotional_signals",
+            "stakeholder_stance",
+            "suggested_story_formats",
+            "kerala_relevance",
+            "coverage_recommendation",
+            "recommended_angle",
+            "themes",
+            "tags",
+            "scoring_inputs",
+        ],
+    },
+}

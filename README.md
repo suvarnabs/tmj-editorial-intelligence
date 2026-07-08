@@ -2,7 +2,7 @@
 
 Internal newsroom intelligence platform for **The Malabar Journal**.
 
-This repository is built in milestones. **Milestone 2** adds a local RSS ingestion pipeline on top of the FastAPI backend, Next.js frontend, and Supabase database.
+This repository is built in milestones. **Milestone 3** adds local AI enrichment, editorial scoring, themes, and tags on top of the RSS ingestion pipeline.
 
 See [PROJECT_BRIEF.md](./PROJECT_BRIEF.md) and [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for full scope and roadmap.
 
@@ -105,6 +105,62 @@ After a successful run:
 - Check `articles` for new rows with `title`, `url`, `published_at`, `extracted_text`, and `word_count`.
 - Check `ingestion_runs` for one row with `status`, source counts, article counts, and any per-source errors.
 - Run ingestion a second time and confirm the article count does not increase for duplicate URLs.
+
+## Milestone 3 local enrichment
+
+Milestone 3 enriches ingested RSS articles with summaries, sentiment, emotional signals, stakeholder stance, TMJ relevance, recommended angles, story formats, themes, tags, and a deterministic editorial score.
+
+Enrichment is local and manually triggered. `POST /api/v1/enrichment/run` and `POST /api/v1/articles/{id}/reprocess` require the same `X-API-Key` header used by ingestion.
+
+### Backend environment additions
+
+Add these to `backend/.env`:
+
+```env
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_CHAT_MODEL=gpt-4o-mini
+ENRICHMENT_BATCH_SIZE=3
+```
+
+### Apply Milestone 3 migration
+
+Run `supabase/migrations/004_enrichment_schema.sql` in the Supabase SQL Editor.
+
+### Trigger enrichment for only 2 articles
+
+From any terminal:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/api/v1/enrichment/run" -ContentType "application/json" -Headers @{ "X-API-Key" = "replace-with-a-long-random-local-secret" } -Body '{"limit":2}'
+```
+
+### Reprocess one article
+
+Replace `{article_id}` with an article ID from Supabase:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/api/v1/articles/{article_id}/reprocess" -Headers @{ "X-API-Key" = "replace-with-a-long-random-local-secret" }
+```
+
+### Milestone 3 endpoints
+
+| Method | URL | Description |
+|---|---|---|
+| POST | http://localhost:8000/api/v1/enrichment/run | Enrich a small pending batch; requires `X-API-Key` |
+| GET | http://localhost:8000/api/v1/enrichment/status | Counts by article processing status |
+| POST | http://localhost:8000/api/v1/articles/{id}/reprocess | Re-enrich one article; requires `X-API-Key` |
+| GET | http://localhost:8000/api/v1/themes | List active editorial themes |
+
+### Verify in Supabase
+
+After a successful enrichment run:
+
+- Check `articles` for `processing_status='completed'`.
+- Confirm `summary`, `sentiment`, `sentiment_score`, `emotional_signals`, `stakeholder_stance`, `kerala_relevance`, `recommended_angle`, `coverage_recommendation`, and `editorial_score` are populated.
+- Confirm `editorial_score` is between `0` and `100`.
+- Check `article_themes` for theme assignments.
+- Check `article_tags` for normalized tags.
+- If an article fails, confirm `processing_status='failed'` and `processing_error` contains the reason.
 
 ## Database
 
