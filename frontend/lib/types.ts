@@ -83,11 +83,13 @@ export interface Article {
 export interface Source {
   id: string;
   name: string;
+  source_type: string;
   feed_url: string;
   publisher?: string | null;
   region?: string | null;
   language: string;
   is_active: boolean;
+  notes?: string | null;
   last_fetched_at?: string | null;
   last_error?: string | null;
   created_at: string;

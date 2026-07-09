@@ -1,11 +1,24 @@
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
+from psycopg.errors import UniqueViolation
 
 from app.db.repositories import sources
 from app.schemas.sources import SourceCreate, SourceRead, SourceUpdate
 
 router = APIRouter(prefix="/api/v1/sources", tags=["sources"])
+
+DUPLICATE_FEED_URL_MESSAGE = (
+    "This feed URL already exists. Edit the existing source instead of adding a duplicate."
+)
+
+
+def _is_duplicate_feed_url_error(exc: Exception) -> bool:
+    if isinstance(exc, UniqueViolation):
+        constraint_name = getattr(exc.diag, "constraint_name", "")
+        return constraint_name == "sources_feed_url_key"
+
+    return "sources_feed_url_key" in str(exc)
 
 
 @router.get("", response_model=list[SourceRead])
@@ -18,6 +31,11 @@ def create_source(payload: SourceCreate) -> dict:
     try:
         return sources.create_source(payload.model_dump())
     except Exception as exc:
+        if _is_duplicate_feed_url_error(exc):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=DUPLICATE_FEED_URL_MESSAGE,
+            ) from exc
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -34,6 +52,11 @@ def update_source(source_id: UUID, payload: SourceUpdate) -> dict:
     try:
         source = sources.update_source(str(source_id), payload.model_dump(exclude_unset=True))
     except Exception as exc:
+        if _is_duplicate_feed_url_error(exc):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=DUPLICATE_FEED_URL_MESSAGE,
+            ) from exc
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     if not source:

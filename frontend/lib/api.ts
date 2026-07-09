@@ -69,3 +69,25 @@ export function generateBrief<T>(limit: number) {
     body: JSON.stringify({ limit }),
   });
 }
+
+export function createSource<T>(payload: Record<string, unknown>) {
+  return fetchApi<T>("/api/v1/sources", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateSource<T>(sourceId: string, payload: Record<string, unknown>) {
+  return fetchApi<T>(`/api/v1/sources/${sourceId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deactivateSource<T>(sourceId: string) {
+  return fetchApi<T>(`/api/v1/sources/${sourceId}`, {
+    method: "DELETE",
+  });
+}

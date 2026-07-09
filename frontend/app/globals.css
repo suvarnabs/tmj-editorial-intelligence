@@ -43,7 +43,9 @@ a:hover {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -61,10 +63,18 @@ button:disabled {
   opacity: 0.65;
 }
 
-input {
+input,
+select,
+textarea {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.65rem 0.75rem;
+  width: 100%;
+}
+
+textarea {
+  min-height: 5rem;
+  resize: vertical;
 }
 
 table {
@@ -440,6 +450,65 @@ code {
 
 .workflow-card p {
   margin: 0;
+}
+
+.source-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.source-form-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.source-form-grid label {
+  color: var(--muted);
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  text-transform: uppercase;
+}
+
+.wide-field {
+  grid-column: 1 / -1;
+}
+
+.checkbox-label {
+  align-content: center;
+  display: flex !important;
+  flex-direction: row;
+  gap: 0.55rem !important;
+  text-transform: none !important;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+.source-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.source-card-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.source-card-header h2 {
+  margin-top: 0.45rem;
+}
+
+.source-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
 .field-label {

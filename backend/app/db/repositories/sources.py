@@ -31,24 +31,50 @@ def create_source(data: dict[str, Any]) -> dict[str, Any]:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO sources (name, feed_url, publisher, region, language, is_active)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO sources (
+                    name,
+                    source_type,
+                    feed_url,
+                    publisher,
+                    region,
+                    language,
+                    is_active,
+                    notes
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING *
                 """,
                 (
                     data["name"],
+                    data.get("source_type", "rss"),
                     str(data["feed_url"]),
                     data.get("publisher"),
                     data.get("region"),
                     data.get("language", "en"),
                     data.get("is_active", True),
+                    data.get("notes"),
                 ),
             )
             return cur.fetchone()
 
 
 def update_source(source_id: str, data: dict[str, Any]) -> dict[str, Any] | None:
-    clean_data = {key: value for key, value in data.items() if value is not None}
+    nullable_fields = {"publisher", "region", "notes"}
+    allowed_fields = {
+        "name",
+        "source_type",
+        "feed_url",
+        "publisher",
+        "region",
+        "language",
+        "is_active",
+        "notes",
+    }
+    clean_data = {
+        key: value
+        for key, value in data.items()
+        if key in allowed_fields and (value is not None or key in nullable_fields)
+    }
     if "feed_url" in clean_data:
         clean_data["feed_url"] = str(clean_data["feed_url"])
 
