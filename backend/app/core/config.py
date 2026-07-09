@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_chat_model: str = "gpt-4o-mini"
     enrichment_batch_size: int = 3
+    brief_top_n_articles: int = 5
+    brief_timezone: str = "Asia/Qatar"
 
     @property
     def cors_origin_list(self) -> list[str]:

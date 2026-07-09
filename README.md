@@ -2,7 +2,7 @@
 
 Internal newsroom intelligence platform for **The Malabar Journal**.
 
-This repository is built in milestones. **Milestone 3** adds local AI enrichment, editorial scoring, themes, and tags on top of the RSS ingestion pipeline.
+This repository is built in milestones. **Milestone 4** adds local daily editorial brief generation on top of RSS ingestion and AI enrichment.
 
 See [PROJECT_BRIEF.md](./PROJECT_BRIEF.md) and [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for full scope and roadmap.
 
@@ -161,6 +161,53 @@ After a successful enrichment run:
 - Check `article_themes` for theme assignments.
 - Check `article_tags` for normalized tags.
 - If an article fails, confirm `processing_status='failed'` and `processing_error` contains the reason.
+
+## Milestone 4 local brief generation
+
+Milestone 4 generates a daily editorial brief from completed enriched articles. Brief generation is manual and local. It uses one structured OpenAI call per brief and stores the result in `editorial_briefs`.
+
+`POST /api/v1/briefs/generate` requires the same `X-API-Key` header used by ingestion and enrichment.
+
+### Backend environment additions
+
+Add these to `backend/.env`:
+
+```env
+BRIEF_TOP_N_ARTICLES=5
+BRIEF_TIMEZONE=Asia/Qatar
+```
+
+### Apply Milestone 4 migration
+
+Run `supabase/migrations/005_briefs_schema.sql` in the Supabase SQL Editor.
+
+### Generate today's brief with only 3 articles
+
+From any terminal:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/api/v1/briefs/generate" -ContentType "application/json" -Headers @{ "X-API-Key" = "replace-with-a-long-random-local-secret" } -Body '{"limit":3}'
+```
+
+When fewer than 3 completed enriched articles exist for today's `Asia/Qatar` date window, the API falls back to recent completed enriched articles. The `metadata` field records whether fallback articles were used.
+
+### Milestone 4 endpoints
+
+| Method | URL | Description |
+|---|---|---|
+| POST | http://localhost:8000/api/v1/briefs/generate | Generate or regenerate a brief; requires `X-API-Key` |
+| GET | http://localhost:8000/api/v1/briefs | List briefs |
+| GET | http://localhost:8000/api/v1/briefs/today | Get today's brief using `Asia/Qatar` date |
+| GET | http://localhost:8000/api/v1/briefs/{date} | Get a brief by `YYYY-MM-DD` |
+
+### Verify in Supabase
+
+After a successful brief generation:
+
+- Check `editorial_briefs` for one row with today's `brief_date`.
+- Confirm `headline`, `executive_summary`, `sections`, `ranked_article_ids`, and `metadata` are populated.
+- Confirm `sections` includes `what_happened`, `why_it_matters`, `sentiment_landscape`, `tmj_angle`, and `coverage_recommendations`.
+- Run the same generate command again and confirm the same `brief_date` row updates instead of creating a duplicate.
 
 ## Database
 
