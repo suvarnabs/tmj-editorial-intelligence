@@ -1,4 +1,6 @@
-import type { Brief } from "@/lib/types";
+import Link from "next/link";
+
+import type { Brief, RankedArticle } from "@/lib/types";
 
 type BriefRecord = Record<string, unknown>;
 
@@ -41,6 +43,19 @@ function readableValue(value: unknown): string {
   return String(value);
 }
 
+function formatDate(value?: string | null) {
+  return value ? new Date(value).toLocaleDateString() : "Not available";
+}
+
+function formatLabel(value?: string | null) {
+  if (!value) return "Not available";
+  return titleCase(value);
+}
+
+function formatScore(value?: number | null) {
+  return value === null || value === undefined ? "Not scored" : value.toFixed(1);
+}
+
 function asRecord(value: unknown): BriefRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as BriefRecord)
@@ -54,7 +69,7 @@ function getText(item: BriefRecord) {
 
 function ArticleTechnicalId({ id }: { id: unknown }) {
   if (!id) return null;
-  return <div className="technical-text">Article ID: {shortId(String(id))}</div>;
+  return <div className="technical-text">Article ref: {shortId(String(id))}</div>;
 }
 
 function GenericArticleItems({ items }: { items: unknown[] }) {
@@ -155,6 +170,56 @@ function Metadata({ metadata }: { metadata: Brief["metadata"] }) {
   );
 }
 
+function RankedArticleItem({
+  article,
+  fallbackId,
+}: {
+  article?: RankedArticle | null;
+  fallbackId?: string;
+}) {
+  const id = article?.id ?? fallbackId;
+  const title = article?.title || "Article not found";
+
+  return (
+    <li className="ranked-article-item">
+      <div>
+        {id && article?.title ? (
+          <Link className="ranked-article-title" href={`/articles/${id}`}>
+            {title}
+          </Link>
+        ) : (
+          <span className="ranked-article-title">{title}</span>
+        )}
+        <div className="table-subtext">
+          {article?.source_name ? `${article.source_name} · ` : ""}
+          {article?.published_at ? formatDate(article.published_at) : "Published date not available"}
+        </div>
+      </div>
+
+      <div className="ranked-article-meta">
+        <span className="badge">Score: {formatScore(article?.editorial_score)}</span>
+        <span className="badge badge-coverage">
+          Coverage: {formatLabel(article?.coverage_recommendation)}
+        </span>
+        <span className="badge badge-neutral">
+          Status: {formatLabel(article?.processing_status)}
+        </span>
+      </div>
+
+      <div className="ranked-article-links">
+        {id ? <Link href={`/articles/${id}`}>Open detail</Link> : null}
+        {article?.url ? (
+          <a href={article.url} target="_blank" rel="noopener noreferrer">
+            Original article
+          </a>
+        ) : null}
+      </div>
+
+      {id ? <ArticleTechnicalId id={id} /> : null}
+    </li>
+  );
+}
+
 export function BriefView({ brief }: { brief: Brief }) {
   return (
     <div className="page-stack">
@@ -176,12 +241,20 @@ export function BriefView({ brief }: { brief: Brief }) {
       <section className="two-column support-section">
         <article className="panel support-panel">
           <h2>Ranked Articles</h2>
-          {brief.ranked_article_ids && brief.ranked_article_ids.length > 0 ? (
+          {brief.ranked_articles && brief.ranked_articles.length > 0 ? (
+            <ol className="ranked-list">
+              {brief.ranked_articles.map((article, index) => (
+                <RankedArticleItem
+                  article={article}
+                  fallbackId={brief.ranked_article_ids?.[index]}
+                  key={article?.id ?? brief.ranked_article_ids?.[index] ?? index}
+                />
+              ))}
+            </ol>
+          ) : brief.ranked_article_ids && brief.ranked_article_ids.length > 0 ? (
             <ol className="ranked-list">
               {brief.ranked_article_ids.map((id) => (
-                <li key={id}>
-                  <span>Article ID: {shortId(id)}</span>
-                </li>
+                <RankedArticleItem fallbackId={id} key={id} />
               ))}
             </ol>
           ) : (

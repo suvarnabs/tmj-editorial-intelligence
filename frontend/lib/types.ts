@@ -41,8 +41,20 @@ export interface Brief {
   executive_summary?: string | null;
   sections: Record<string, unknown>;
   ranked_article_ids?: string[] | null;
+  ranked_articles?: RankedArticle[] | null;
   metadata?: Record<string, unknown> | null;
   created_at: string;
+}
+
+export interface RankedArticle {
+  id: string;
+  title?: string | null;
+  url?: string | null;
+  source_name?: string | null;
+  published_at?: string | null;
+  editorial_score?: number | null;
+  coverage_recommendation?: string | null;
+  processing_status?: string | null;
 }
 
 export interface ArticleTheme {
@@ -54,6 +66,9 @@ export interface ArticleTheme {
 export interface Article {
   id: string;
   source_id: string;
+  source_name?: string | null;
+  source_type?: string | null;
+  source_publisher?: string | null;
   title: string;
   url: string;
   author?: string | null;

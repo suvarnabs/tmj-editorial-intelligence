@@ -89,7 +89,9 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
                   <tr key={article.id}>
                     <td className="article-title-cell">
                       <Link href={`/articles/${article.id}`}>{article.title}</Link>
-                      <div className="table-subtext">Article ID: {article.id.slice(0, 8)}...</div>
+                      <div className="table-subtext">
+                        {article.source_name ?? "Source not available"}
+                      </div>
                     </td>
                     <td>{formatDate(article.published_at)}</td>
                     <td>

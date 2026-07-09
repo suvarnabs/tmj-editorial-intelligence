@@ -9,6 +9,9 @@ class ArticleRead(BaseModel):
 
     id: UUID
     source_id: UUID
+    source_name: str | None = None
+    source_type: str | None = None
+    source_publisher: str | None = None
     title: str
     url: HttpUrl
     author: str | None = None

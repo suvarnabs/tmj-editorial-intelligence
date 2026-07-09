@@ -10,6 +10,17 @@ class BriefGenerateRequest(BaseModel):
     limit: int | None = Field(default=None, ge=1, le=25)
 
 
+class BriefRankedArticle(BaseModel):
+    id: UUID
+    title: str | None = None
+    url: str | None = None
+    source_name: str | None = None
+    published_at: datetime | None = None
+    editorial_score: float | None = None
+    coverage_recommendation: str | None = None
+    processing_status: str | None = None
+
+
 class BriefRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -21,5 +32,6 @@ class BriefRead(BaseModel):
     executive_summary: str | None = None
     sections: dict[str, Any]
     ranked_article_ids: list[UUID] | None = None
+    ranked_articles: list[BriefRankedArticle] | None = None
     metadata: dict[str, Any] | None = None
     created_at: datetime

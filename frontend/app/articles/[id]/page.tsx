@@ -29,6 +29,10 @@ function badgeClass(value?: string | null) {
   return "badge";
 }
 
+function shortId(id: string) {
+  return id.length > 12 ? `${id.slice(0, 8)}...` : id;
+}
+
 function JsonBlock({ value }: { value: unknown }) {
   if (!value) {
     return <p className="muted">Not available</p>;
@@ -64,7 +68,10 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         <h1>{article.title}</h1>
         <p className="muted">Published: {formatDate(article.published_at)}</p>
         <p className="muted">
-          Source: <code>{article.source_id}</code>
+          Source: {article.source_name ?? "Source not available"}
+          {!article.source_name ? (
+            <span className="technical-text"> ({shortId(article.source_id)})</span>
+          ) : null}
         </p>
         <a href={article.url} target="_blank" rel="noopener noreferrer">
           Open original article

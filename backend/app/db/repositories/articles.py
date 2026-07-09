@@ -55,8 +55,13 @@ def list_articles(
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT *
+                SELECT
+                    articles.*,
+                    sources.name AS source_name,
+                    sources.source_type AS source_type,
+                    sources.publisher AS source_publisher
                 FROM articles
+                LEFT JOIN sources ON sources.id = articles.source_id
                 {where_clause}
                 ORDER BY published_at DESC NULLS LAST, created_at DESC
                 LIMIT %s OFFSET %s
@@ -99,7 +104,19 @@ def _attach_article_taxonomy(article: dict[str, Any]) -> dict[str, Any]:
 def get_article(article_id: str) -> dict[str, Any] | None:
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT * FROM articles WHERE id = %s", (article_id,))
+            cur.execute(
+                """
+                SELECT
+                    articles.*,
+                    sources.name AS source_name,
+                    sources.source_type AS source_type,
+                    sources.publisher AS source_publisher
+                FROM articles
+                LEFT JOIN sources ON sources.id = articles.source_id
+                WHERE articles.id = %s
+                """,
+                (article_id,),
+            )
             article = cur.fetchone()
 
     if not article:
