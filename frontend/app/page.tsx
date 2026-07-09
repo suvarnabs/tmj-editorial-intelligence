@@ -23,6 +23,11 @@ const cards = [
     title: "Sources",
     description: "Review configured RSS sources.",
   },
+  {
+    href: "/workflow",
+    title: "Workflow Controls",
+    description: "Run ingestion, enrichment and brief generation manually.",
+  },
 ];
 
 export default async function HomePage() {

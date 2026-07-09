@@ -3,6 +3,9 @@ export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://127.0.0.1:8000";
 
+export const API_SECRET_KEY =
+  process.env.NEXT_PUBLIC_API_SECRET_KEY ?? "tmj-local-dev-secret-2026";
+
 export type ApiResult<T> =
   | { data: T; error: null; status: number }
   | { data: null; error: string; status: number };
@@ -35,4 +38,34 @@ export async function fetchApi<T>(path: string, init?: RequestInit): Promise<Api
       status: 0,
     };
   }
+}
+
+function workflowHeaders(): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    "X-API-Key": API_SECRET_KEY,
+  };
+}
+
+export function runIngestion<T>() {
+  return fetchApi<T>("/api/v1/ingestion/run", {
+    method: "POST",
+    headers: workflowHeaders(),
+  });
+}
+
+export function runEnrichment<T>(limit: number) {
+  return fetchApi<T>("/api/v1/enrichment/run", {
+    method: "POST",
+    headers: workflowHeaders(),
+    body: JSON.stringify({ limit }),
+  });
+}
+
+export function generateBrief<T>(limit: number) {
+  return fetchApi<T>("/api/v1/briefs/generate", {
+    method: "POST",
+    headers: workflowHeaders(),
+    body: JSON.stringify({ limit }),
+  });
 }

@@ -7,6 +7,31 @@ export interface HealthResponse {
   };
 }
 
+export interface IngestionRun {
+  id: string;
+  started_at: string;
+  completed_at?: string | null;
+  status: string;
+  sources_attempted: number;
+  sources_succeeded: number;
+  articles_fetched: number;
+  articles_new: number;
+  error_summary?: Record<string, unknown> | Record<string, unknown>[] | null;
+  triggered_by?: string | null;
+}
+
+export interface EnrichmentRunResponse {
+  status: string;
+  attempted: number;
+  completed: number;
+  failed: number;
+  errors: Record<string, unknown>[];
+}
+
+export interface EnrichmentStatusResponse {
+  counts: Record<string, number>;
+}
+
 export interface Brief {
   id: string;
   brief_date: string;

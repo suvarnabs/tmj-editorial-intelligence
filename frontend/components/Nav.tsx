@@ -6,6 +6,7 @@ const links = [
   { href: "/briefs", label: "Brief by Date" },
   { href: "/articles", label: "Articles" },
   { href: "/sources", label: "Sources" },
+  { href: "/workflow", label: "Workflow" },
 ];
 
 export function Nav() {
