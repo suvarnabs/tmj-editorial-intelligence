@@ -4,11 +4,34 @@ import { fetchApi } from "@/lib/api";
 import type { Article } from "@/lib/types";
 
 function formatDate(value?: string | null) {
-  return value ? new Date(value).toLocaleString() : "Not available";
+  return value ? new Date(value).toLocaleDateString() : "Not available";
+}
+
+function formatLabel(value?: string | null) {
+  if (!value) return "Not available";
+  return value
+    .replaceAll("_", " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function formatScore(value?: number | null) {
   return value === null || value === undefined ? "Not scored" : value.toFixed(1);
+}
+
+function badgeClass(value?: string | null) {
+  const normalized = value?.toLowerCase();
+  if (normalized === "completed" || normalized === "positive") return "badge badge-good";
+  if (normalized === "pending" || normalized === "neutral") return "badge badge-neutral";
+  if (normalized === "negative" || normalized === "failed") return "badge badge-alert";
+  return "badge";
+}
+
+function BadgeValue({ value, fallback }: { value?: string | null; fallback: string }) {
+  const label = value ? formatLabel(value) : fallback;
+  return <span className={badgeClass(value ?? fallback)}>{label}</span>;
 }
 
 export default async function ArticlesPage() {
@@ -26,15 +49,14 @@ export default async function ArticlesPage() {
       ) : result.data.length === 0 ? (
         <EmptyState message="No articles found. Run RSS ingestion first." />
       ) : (
-        <section className="panel table-wrap">
+        <section className="panel table-wrap articles-table">
           <table>
             <thead>
               <tr>
                 <th>Title</th>
-                <th>Source</th>
                 <th>Published</th>
                 <th>Sentiment</th>
-                <th>Kerala relevance</th>
+                <th>Relevance</th>
                 <th>Score</th>
                 <th>Coverage</th>
                 <th>Status</th>
@@ -43,18 +65,24 @@ export default async function ArticlesPage() {
             <tbody>
               {result.data.map((article) => (
                 <tr key={article.id}>
-                  <td>
+                  <td className="article-title-cell">
                     <Link href={`/articles/${article.id}`}>{article.title}</Link>
-                  </td>
-                  <td>
-                    <code>{article.source_id}</code>
+                    <div className="table-subtext">Article ID: {article.id.slice(0, 8)}...</div>
                   </td>
                   <td>{formatDate(article.published_at)}</td>
-                  <td>{article.sentiment ?? "Not enriched"}</td>
-                  <td className="clip-text">{article.kerala_relevance ?? "Not available"}</td>
-                  <td>{formatScore(article.editorial_score)}</td>
-                  <td>{article.coverage_recommendation ?? "Not available"}</td>
-                  <td>{article.processing_status ?? "unknown"}</td>
+                  <td>
+                    <BadgeValue value={article.sentiment} fallback="Not enriched" />
+                  </td>
+                  <td className="relevance-cell">{article.kerala_relevance ?? "Not available"}</td>
+                  <td>
+                    <span className="badge">{formatScore(article.editorial_score)}</span>
+                  </td>
+                  <td>
+                    <BadgeValue value={article.coverage_recommendation} fallback="Not available" />
+                  </td>
+                  <td>
+                    <BadgeValue value={article.processing_status} fallback="Not available" />
+                  </td>
                 </tr>
               ))}
             </tbody>

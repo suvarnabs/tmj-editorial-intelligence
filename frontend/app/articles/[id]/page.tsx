@@ -11,6 +11,24 @@ function formatDate(value?: string | null) {
   return value ? new Date(value).toLocaleString() : "Not available";
 }
 
+function formatLabel(value?: string | null) {
+  if (!value) return "Not available";
+  return value
+    .replaceAll("_", " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function badgeClass(value?: string | null) {
+  const normalized = value?.toLowerCase();
+  if (normalized === "completed" || normalized === "positive") return "badge badge-good";
+  if (normalized === "pending" || normalized === "neutral") return "badge badge-neutral";
+  if (normalized === "negative" || normalized === "failed") return "badge badge-alert";
+  return "badge";
+}
+
 function JsonBlock({ value }: { value: unknown }) {
   if (!value) {
     return <p className="muted">Not available</p>;
@@ -40,7 +58,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   return (
     <main className="container page-stack">
       <section className="panel">
-        <div className="eyebrow">{article.processing_status ?? "unknown status"}</div>
+        <span className={badgeClass(article.processing_status)}>
+          {formatLabel(article.processing_status)}
+        </span>
         <h1>{article.title}</h1>
         <p className="muted">Published: {formatDate(article.published_at)}</p>
         <p className="muted">
@@ -58,20 +78,26 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         </article>
         <article className="panel">
           <h2>Recommendation</h2>
-          <dl className="detail-list">
+          <div className="metric-row">
             <div>
-              <dt>Sentiment</dt>
-              <dd>{article.sentiment ?? "Not available"}</dd>
+              <span className="metric-label">Sentiment</span>
+              <span className={badgeClass(article.sentiment)}>{formatLabel(article.sentiment)}</span>
             </div>
             <div>
-              <dt>Editorial score</dt>
-              <dd>{article.editorial_score ?? "Not scored"}</dd>
+              <span className="metric-label">Score</span>
+              <span className="badge">
+                {article.editorial_score === null || article.editorial_score === undefined
+                  ? "Not scored"
+                  : article.editorial_score}
+              </span>
             </div>
             <div>
-              <dt>Coverage</dt>
-              <dd>{article.coverage_recommendation ?? "Not available"}</dd>
+              <span className="metric-label">Coverage</span>
+              <span className={badgeClass(article.coverage_recommendation)}>
+                {formatLabel(article.coverage_recommendation)}
+              </span>
             </div>
-          </dl>
+          </div>
         </article>
       </section>
 
@@ -126,8 +152,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         </article>
       </section>
 
-      <section className="panel">
+      <section className="panel support-panel">
         <h2>Raw Article Metadata</h2>
+        <p className="muted technical-intro">Technical details retained for debugging and source tracing.</p>
         <dl className="detail-list">
           <div>
             <dt>Article ID</dt>
