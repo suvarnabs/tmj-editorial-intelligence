@@ -19,7 +19,7 @@ def list_articles(
     status: str | None = Query(default=None),
     theme: str | None = Query(default=None),
     min_score: float | None = Query(default=None, ge=0, le=100),
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=20, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[dict]:
     return articles.list_articles(

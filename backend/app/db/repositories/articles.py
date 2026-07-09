@@ -13,7 +13,7 @@ def list_articles(
     status: str | None = None,
     theme: str | None = None,
     min_score: float | None = None,
-    limit: int = 50,
+    limit: int = 20,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     filters: list[str] = []
@@ -58,7 +58,7 @@ def list_articles(
                 SELECT *
                 FROM articles
                 {where_clause}
-                ORDER BY published_at DESC NULLS LAST, fetched_at DESC
+                ORDER BY published_at DESC NULLS LAST, created_at DESC
                 LIMIT %s OFFSET %s
                 """,
                 params,
