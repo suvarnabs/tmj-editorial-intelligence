@@ -29,5 +29,7 @@ class ArticleRead(BaseModel):
     editorial_score: float | None = None
     coverage_recommendation: str | None = None
     recommended_angle: str | None = None
+    themes: list[dict] | None = None
+    tags: list[str] | None = None
     created_at: datetime
     updated_at: datetime

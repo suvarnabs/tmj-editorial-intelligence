@@ -1,49 +1,76 @@
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const healthUrl = `${apiUrl}/health`;
+import Link from "next/link";
+import { API_BASE_URL, fetchApi } from "@/lib/api";
+import type { HealthResponse } from "@/lib/types";
 
-export default function HomePage() {
+const cards = [
+  {
+    href: "/briefs/today",
+    title: "Today's Brief",
+    description: "Read the latest generated editorial brief.",
+  },
+  {
+    href: "/briefs",
+    title: "Brief by Date",
+    description: "Look up an existing brief for a selected date.",
+  },
+  {
+    href: "/articles",
+    title: "Articles",
+    description: "Browse ingested and enriched RSS articles.",
+  },
+  {
+    href: "/sources",
+    title: "Sources",
+    description: "Review configured RSS sources.",
+  },
+];
+
+export default async function HomePage() {
+  const health = await fetchApi<HealthResponse>("/health");
+
   return (
-    <main
-      style={{
-        maxWidth: "640px",
-        margin: "0 auto",
-        padding: "4rem 1.5rem",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "2rem",
-          fontWeight: 600,
-          marginBottom: "0.75rem",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        TMJ Editorial Intelligence
-      </h1>
-
-      <p style={{ color: "var(--muted)", marginBottom: "2rem" }}>
-        Internal newsroom intelligence platform for The Malabar Journal.
-        Milestone 1: local development starter.
-      </p>
-
-      <section
-        style={{
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          padding: "1.25rem 1.5rem",
-          background: "#fff",
-        }}
-      >
-        <h2 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-          Backend health check
-        </h2>
-        <p style={{ color: "var(--muted)", fontSize: "0.95rem", marginBottom: "1rem" }}>
-          When the backend is running and connected to Supabase, this endpoint
-          returns a JSON status response.
+    <main className="container page-stack">
+      <section className="hero">
+        <h1>TMJ Editorial Intelligence Engine</h1>
+        <p>
+          Local editorial intelligence dashboard for monitoring sources, articles,
+          enrichment and daily briefs.
         </p>
-        <a href={healthUrl} target="_blank" rel="noopener noreferrer">
-          Open {healthUrl}
-        </a>
+      </section>
+
+      <section className="nav-card-grid" aria-label="Dashboard navigation">
+        {cards.map((card) => (
+          <Link className="nav-card" href={card.href} key={card.href}>
+            <h2>{card.title}</h2>
+            <p>{card.description}</p>
+          </Link>
+        ))}
+      </section>
+
+      <section className="panel">
+        <h2>Backend Health</h2>
+        {health.data ? (
+          <dl className="detail-list">
+            <div>
+              <dt>API</dt>
+              <dd>{API_BASE_URL}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{health.data.status}</dd>
+            </div>
+            <div>
+              <dt>Environment</dt>
+              <dd>{health.data.environment}</dd>
+            </div>
+            <div>
+              <dt>Database connected</dt>
+              <dd>{health.data.database?.connected ? "Yes" : "No"}</dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="muted">Backend health is unavailable: {health.error}</p>
+        )}
       </section>
     </main>
   );

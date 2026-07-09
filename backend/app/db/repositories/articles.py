@@ -66,11 +66,46 @@ def list_articles(
             return list(cur.fetchall())
 
 
+def _attach_article_taxonomy(article: dict[str, Any]) -> dict[str, Any]:
+    article_id = str(article["id"])
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT et.slug, et.name, at.confidence
+                FROM article_themes at
+                JOIN editorial_themes et ON et.id = at.theme_id
+                WHERE at.article_id = %s
+                ORDER BY at.confidence DESC, et.name ASC
+                """,
+                (article_id,),
+            )
+            article["themes"] = list(cur.fetchall())
+
+            cur.execute(
+                """
+                SELECT tag
+                FROM article_tags
+                WHERE article_id = %s
+                ORDER BY tag ASC
+                """,
+                (article_id,),
+            )
+            article["tags"] = [row["tag"] for row in cur.fetchall()]
+
+    return article
+
+
 def get_article(article_id: str) -> dict[str, Any] | None:
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM articles WHERE id = %s", (article_id,))
-            return cur.fetchone()
+            article = cur.fetchone()
+
+    if not article:
+        return None
+
+    return _attach_article_taxonomy(article)
 
 
 def list_pending_for_enrichment(limit: int) -> list[dict[str, Any]]:
